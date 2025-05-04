@@ -1,1 +1,104 @@
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import { StairIcon } from "lucide-react";
 
+const rooms = [
+  {
+    code: "10 2 4",
+    label: "Salle 10 2 4",
+    building: "10",
+    floor: "2",
+    number: "4",
+    position: { x: 180, y: 260 }
+  },
+  {
+    code: "11 1 3",
+    label: "Salle 11 1 3",
+    building: "11",
+    floor: "1",
+    number: "3",
+    position: { x: 260, y: 180 }
+  }
+];
+
+const stairs = [
+  { id: 1, x: 100, y: 200 },
+  { id: 2, x: 220, y: 280 }
+];
+
+export default function LyceeMap() {
+  const [inputCode, setInputCode] = useState("");
+  const [selectedRoom, setSelectedRoom] = useState(null);
+
+  const handleSearch = () => {
+    const match = rooms.find((r) => r.code === inputCode.trim());
+    setSelectedRoom(match || "not-found");
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <Card className="w-full max-w-md mb-4">
+        <CardContent className="space-y-4">
+          <h1 className="text-2xl font-bold">Trouver une salle</h1>
+          <Input
+            placeholder="Ex : 10 2 4"
+            value={inputCode}
+            onChange={(e) => setInputCode(e.target.value)}
+          />
+          <Button onClick={handleSearch}>Localiser</Button>
+        </CardContent>
+      </Card>
+
+      <div className="relative w-[400px] h-[500px] bg-white shadow rounded-xl border overflow-hidden">
+        <img
+          src="/plan-lycee-simplifie.png"
+          alt="Plan du lycée"
+          className="w-full h-full object-cover"
+        />
+
+        {/* Escaliers */}
+        {stairs.map((s) => (
+          <div
+            key={s.id}
+            className="absolute text-gray-700"
+            style={{ left: s.x, top: s.y }}
+          >
+            <StairIcon size={24} />
+          </div>
+        ))}
+
+        {/* Salle ciblée */}
+        {selectedRoom && selectedRoom !== "not-found" && (
+          <motion.div
+            className="absolute w-4 h-4 bg-blue-600 rounded-full border border-white"
+            animate={{
+              x: selectedRoom.position.x,
+              y: selectedRoom.position.y
+            }}
+            transition={{ duration: 1.5 }}
+          />
+        )}
+
+        {/* Classe non trouvée */}
+        {selectedRoom === "not-found" && (
+          <div className="absolute top-4 left-4 bg-red-100 text-red-700 p-2 rounded shadow">
+            Salle non trouvée
+          </div>
+        )}
+      </div>
+
+      {/* Détails de la salle */}
+      {selectedRoom && selectedRoom !== "not-found" && (
+        <div className="mt-4 text-center bg-white rounded-xl shadow p-4 w-full max-w-md">
+          <h2 className="text-xl font-semibold">Détails de la salle</h2>
+          <p>Bâtiment : {selectedRoom.building}</p>
+          <p>Étage : {selectedRoom.floor}</p>
+          <p>Numéro de salle : {selectedRoom.number}</p>
+        </div>
+      )}
+    </div>
+  );
+}
